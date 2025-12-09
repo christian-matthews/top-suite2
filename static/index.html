@@ -403,16 +403,46 @@
                     body: formData
                 });
                 
-                const data = await response.json();
+                // Leer respuesta como texto primero
+                const responseText = await response.text();
+                
+                // Intentar parsear como JSON
+                let data;
+                try {
+                    data = JSON.parse(responseText);
+                } catch (parseError) {
+                    // Si no es JSON, crear un objeto de error
+                    console.error('Respuesta no es JSON:', responseText);
+                    data = {
+                        status: 'error',
+                        message: `Error del servidor (${response.status}): ${response.statusText}`,
+                        files: [],
+                        log: [`Respuesta recibida: ${responseText.substring(0, 200)}...`]
+                    };
+                }
+                
+                // Verificar si hay error HTTP
+                if (!response.ok && data.status !== 'error') {
+                    data = {
+                        status: 'error',
+                        message: data.detail || data.message || `Error HTTP: ${response.status}`,
+                        files: data.files || [],
+                        log: data.log || [`Error HTTP ${response.status}`]
+                    };
+                }
                 
                 // Mostrar resultado
                 resultArea.innerHTML = renderResult(data);
                 resultArea.classList.add('show');
                 
             } catch (error) {
+                console.error('Error en submitForm:', error);
                 resultArea.innerHTML = `
                     <div class="result-status error">❌ Error de conexión</div>
-                    <p>${error.message}</p>
+                    <p>${error.message || 'No se pudo conectar al servidor'}</p>
+                    <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.5rem;">
+                        Verifica que el servidor esté corriendo y que la URL sea correcta.
+                    </p>
                 `;
                 resultArea.classList.add('show');
             } finally {
