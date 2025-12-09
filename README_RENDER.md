@@ -24,7 +24,8 @@ git push -u origin main
 3. **Configuración:**
    - **Name:** `top-suite2` (o el nombre que prefieras)
    - **Environment:** `Python 3`
-   - **Build Command:** `pip install -r requirements.txt`
+   - **Python Version:** `3.10.13` (IMPORTANTE: Configurar manualmente en Settings)
+   - **Build Command:** `bash build.sh` (o `pip install --upgrade pip setuptools wheel && pip install -r requirements.txt`)
    - **Start Command:** `uvicorn app:app --host 0.0.0.0 --port $PORT`
    - **Plan:** Free (gratis)
 
