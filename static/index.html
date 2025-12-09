@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TOP Suite 2</title>
+    <style>
+        :root {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-card: #334155;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --accent: #3b82f6;
+            --accent-hover: #2563eb;
+            --success: #22c55e;
+            --error: #ef4444;
+            --border: #475569;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent), #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+        }
+        
+        header p {
+            color: var(--text-secondary);
+        }
+        
+        .process-grid {
+            display: grid;
+            gap: 1.5rem;
+        }
+        
+        .process-card {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid var(--border);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .process-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+        }
+        
+        .process-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .process-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+        
+        .process-desc {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .file-input-group {
+            margin-bottom: 1rem;
+        }
+        
+        .file-input-group label {
+            display: block;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+        
+        .file-input {
+            width: 100%;
+            padding: 0.75rem;
+            background: var(--bg-primary);
+            border: 2px dashed var(--border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+        
+        .file-input:hover {
+            border-color: var(--accent);
+        }
+        
+        .file-input::file-selector-button {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-right: 1rem;
+            font-weight: 500;
+        }
+        
+        .file-input::file-selector-button:hover {
+            background: var(--accent-hover);
+        }
+        
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+            width: 100%;
+            justify-content: center;
+        }
+        
+        .btn:hover:not(:disabled) {
+            background: var(--accent-hover);
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .btn-processing {
+            background: var(--bg-card);
+        }
+        
+        .result-area {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            background: var(--bg-primary);
+            border-radius: 8px;
+            display: none;
+        }
+        
+        .result-area.show {
+            display: block;
+        }
+        
+        .result-status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+        
+        .result-status.success {
+            color: var(--success);
+        }
+        
+        .result-status.error {
+            color: var(--error);
+        }
+        
+        .files-list {
+            margin-bottom: 1rem;
+        }
+        
+        .file-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem;
+            background: var(--bg-secondary);
+            border-radius: 6px;
+            margin-bottom: 0.5rem;
+        }
+        
+        .file-item a {
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .file-item a:hover {
+            text-decoration: underline;
+        }
+        
+        .log-area {
+            background: #0d1117;
+            padding: 1rem;
+            border-radius: 6px;
+            font-family: 'Fira Code', 'Consolas', monospace;
+            font-size: 0.8rem;
+            max-height: 200px;
+            overflow-y: auto;
+            color: #7ee787;
+        }
+        
+        .log-line {
+            margin-bottom: 0.25rem;
+        }
+        
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid transparent;
+            border-top-color: currentColor;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border);
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+        
+        /* Responsive */
+        @media (max-width: 640px) {
+            .container { padding: 1rem; }
+            h1 { font-size: 1.75rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🚀 TOP Suite 2</h1>
+            <p>Procesamiento de archivos Excel - Todo en uno</p>
+        </header>
+        
+        <div class="process-grid">
+            
+            <!-- PROMPT0 - Migrador -->
+            <div class="process-card">
+                <div class="process-header">
+                    <span class="process-title">📋 PROMPT0 - Migrador</span>
+                </div>
+                <p class="process-desc">Migra datos de formato antiguo a nuevo usando mapeo inteligente.</p>
+                <form id="form-prompt0" onsubmit="submitForm(event, 'prompt0', '/api/prompt0')">
+                    <div class="file-input-group">
+                        <label>Archivo CORE.xlsx (con hojas ANTIGUO, TRAINING, FINAL)</label>
+                        <input type="file" name="file" class="file-input" accept=".xlsx,.xls" required>
+                    </div>
+                    <button type="submit" class="btn">
+                        <span class="btn-text">Procesar</span>
+                    </button>
+                </form>
+                <div id="result-prompt0" class="result-area"></div>
+            </div>
+            
+            <!-- PROMPT1 - Comparador -->
+            <div class="process-card">
+                <div class="process-header">
+                    <span class="process-title">🔍 PROMPT1 - Comparar MP</span>
+                </div>
+                <p class="process-desc">Compara dos versiones de Maestro de Productos (BASE vs FINAL).</p>
+                <form id="form-prompt1" onsubmit="submitForm(event, 'prompt1', '/api/prompt1')">
+                    <div class="file-input-group">
+                        <label>Archivo BASE.xlsx</label>
+                        <input type="file" name="base_file" class="file-input" accept=".xlsx,.xls" required>
+                    </div>
+                    <div class="file-input-group">
+                        <label>Archivo FINAL.xlsx</label>
+                        <input type="file" name="final_file" class="file-input" accept=".xlsx,.xls" required>
+                    </div>
+                    <button type="submit" class="btn">
+                        <span class="btn-text">Comparar</span>
+                    </button>
+                </form>
+                <div id="result-prompt1" class="result-area"></div>
+            </div>
+            
+            <!-- PROMPT2 - Ventas -->
+            <div class="process-card">
+                <div class="process-header">
+                    <span class="process-title">💰 PROMPT2 - Procesar Ventas</span>
+                </div>
+                <p class="process-desc">Procesa ventas contra el Maestro de Productos.</p>
+                <form id="form-prompt2" onsubmit="submitForm(event, 'prompt2', '/api/prompt2')">
+                    <div class="file-input-group">
+                        <label>Archivo MP KEY.xlsx</label>
+                        <input type="file" name="mp_key_file" class="file-input" accept=".xlsx,.xls" required>
+                    </div>
+                    <div class="file-input-group">
+                        <label>Archivo de Ventas.xlsx</label>
+                        <input type="file" name="ventas_file" class="file-input" accept=".xlsx,.xls" required>
+                    </div>
+                    <button type="submit" class="btn">
+                        <span class="btn-text">Procesar Ventas</span>
+                    </button>
+                </form>
+                <div id="result-prompt2" class="result-area"></div>
+            </div>
+            
+            <!-- PROMPT3 - Enriquecer -->
+            <div class="process-card">
+                <div class="process-header">
+                    <span class="process-title">✨ PROMPT3 - Enriquecer Transacciones</span>
+                </div>
+                <p class="process-desc">Enriquece transacciones con SAP_ID desde MP KEY.</p>
+                <form id="form-prompt3" onsubmit="submitForm(event, 'prompt3', '/api/prompt3')">
+                    <div class="file-input-group">
+                        <label>Archivo TX_Carga.xlsx</label>
+                        <input type="file" name="tx_carga_file" class="file-input" accept=".xlsx,.xls" required>
+                    </div>
+                    <div class="file-input-group">
+                        <label>Archivo MP KEY.xlsx</label>
+                        <input type="file" name="mp_key_file" class="file-input" accept=".xlsx,.xls" required>
+                    </div>
+                    <button type="submit" class="btn">
+                        <span class="btn-text">Enriquecer</span>
+                    </button>
+                </form>
+                <div id="result-prompt3" class="result-area"></div>
+            </div>
+            
+            <!-- Maestro Producto -->
+            <div class="process-card">
+                <div class="process-header">
+                    <span class="process-title">📦 Maestro Producto</span>
+                </div>
+                <p class="process-desc">Convierte Maestro de Productos a formato SAP.</p>
+                <form id="form-maestro" onsubmit="submitForm(event, 'maestro', '/api/maestro-producto')">
+                    <div class="file-input-group">
+                        <label>Archivo Excel con hojas TGT y BASE GS1</label>
+                        <input type="file" name="file" class="file-input" accept=".xlsx,.xls" required>
+                    </div>
+                    <button type="submit" class="btn">
+                        <span class="btn-text">Procesar</span>
+                    </button>
+                </form>
+                <div id="result-maestro" class="result-area"></div>
+            </div>
+            
+        </div>
+        
+        <footer>
+            <p>TOP Suite 2 • Versión unificada • Un solo servidor, sin complicaciones</p>
+        </footer>
+    </div>
+    
+    <script>
+        async function submitForm(event, formId, endpoint) {
+            event.preventDefault();
+            
+            const form = event.target;
+            const btn = form.querySelector('.btn');
+            const btnText = btn.querySelector('.btn-text');
+            const resultArea = document.getElementById(`result-${formId}`);
+            
+            // Estado: procesando
+            btn.disabled = true;
+            btnText.innerHTML = '<span class="spinner"></span> Procesando...';
+            resultArea.classList.remove('show');
+            
+            try {
+                const formData = new FormData(form);
+                
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                // Mostrar resultado
+                resultArea.innerHTML = renderResult(data);
+                resultArea.classList.add('show');
+                
+            } catch (error) {
+                resultArea.innerHTML = `
+                    <div class="result-status error">❌ Error de conexión</div>
+                    <p>${error.message}</p>
+                `;
+                resultArea.classList.add('show');
+            } finally {
+                btn.disabled = false;
+                btnText.textContent = 'Procesar';
+            }
+        }
+        
+        function renderResult(data) {
+            const isSuccess = data.status === 'ok';
+            
+            let html = `
+                <div class="result-status ${isSuccess ? 'success' : 'error'}">
+                    ${isSuccess ? '✅' : '❌'} ${data.message}
+                </div>
+            `;
+            
+            if (data.files && data.files.length > 0) {
+                html += `<div class="files-list">`;
+                for (const file of data.files) {
+                    html += `
+                        <div class="file-item">
+                            <span>📄 ${file.name}</span>
+                            <a href="${file.url}" download>⬇️ Descargar</a>
+                        </div>
+                    `;
+                }
+                html += `</div>`;
+            }
+            
+            if (data.log && data.log.length > 0) {
+                html += `
+                    <div class="log-area">
+                        ${data.log.map(line => `<div class="log-line">${line}</div>`).join('')}
+                    </div>
+                `;
+            }
+            
+            return html;
+        }
+    </script>
+</body>
+</html>
+
+
+
