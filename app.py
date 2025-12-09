@@ -17,10 +17,21 @@ import traceback
 import io
 import contextlib
 import os
+import logging
+
+# Configurar logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
 
 # Agregar el directorio scripts al path
 BASE_DIR = Path(__file__).parent
 sys.path.insert(0, str(BASE_DIR / "scripts"))
+
+logger.info(f"BASE_DIR: {BASE_DIR}")
+logger.info(f"Scripts path: {BASE_DIR / 'scripts'}")
 
 app = FastAPI(title="TOP Suite 2", version="2.0.0")
 
@@ -235,19 +246,24 @@ async def process_prompt1(
     final_file: UploadFile = File(...)
 ):
     """Compara BASE vs FINAL"""
+    logger.info("PROMPT1: Iniciando endpoint")
     job_dir = create_job_dir()
+    logger.info(f"PROMPT1: Job dir creado: {job_dir}")
     log = []
     original_cwd = None
     
     try:
         log.append(f"[{datetime.now().strftime('%H:%M:%S')}] Iniciando PROMPT1 - Comparador...")
+        logger.info("PROMPT1: Guardando archivos...")
         
         # Guardar archivos
         try:
             with open(job_dir / "BASE.xlsx", "wb") as f:
                 shutil.copyfileobj(base_file.file, f)
+            logger.info("PROMPT1: BASE.xlsx guardado")
             with open(job_dir / "FINAL.xlsx", "wb") as f:
                 shutil.copyfileobj(final_file.file, f)
+            logger.info("PROMPT1: FINAL.xlsx guardado")
             log.append(f"[{datetime.now().strftime('%H:%M:%S')}] Archivos recibidos")
         except Exception as e:
             log.append(f"[{datetime.now().strftime('%H:%M:%S')}] Error al guardar archivos: {str(e)}")
@@ -262,9 +278,12 @@ async def process_prompt1(
             )
         
         # Importar el módulo de forma segura
+        logger.info("PROMPT1: Importando módulo...")
         try:
             from prompt1.main import main as run_comparador
+            logger.info("PROMPT1: Módulo importado OK")
         except Exception as e:
+            logger.error(f"PROMPT1: Error importando módulo: {str(e)}")
             log.append(f"[{datetime.now().strftime('%H:%M:%S')}] Error al importar módulo: {str(e)}")
             return JSONResponse(
                 status_code=500,
@@ -277,14 +296,17 @@ async def process_prompt1(
             )
         
         original_cwd = os.getcwd()
+        logger.info(f"PROMPT1: Cambiando a directorio: {job_dir}")
         os.chdir(str(job_dir))
         
         try:
+            logger.info("PROMPT1: Ejecutando comparador...")
             with capture_output() as (stdout, stderr):
                 try:
                     # Ejecutar el script con protección adicional
                     run_comparador()
                     success = True
+                    logger.info("PROMPT1: Comparador ejecutado OK")
                 except SystemExit as e:
                     # Capturar SystemExit sin crashear el servidor
                     success = e.code == 0 if e.code is not None else False
@@ -591,6 +613,56 @@ async def test_upload(file: UploadFile = File(...)):
             "message": str(e),
             "traceback": traceback.format_exc()
         })
+
+
+@app.post("/api/test-prompt1")
+async def test_prompt1(
+    base_file: UploadFile = File(...),
+    final_file: UploadFile = File(...)
+):
+    """Test endpoint para PROMPT1 - solo guarda archivos sin procesar"""
+    logger.info("TEST-PROMPT1: Iniciando...")
+    job_dir = create_job_dir()
+    log = []
+    
+    try:
+        # Leer archivos
+        base_content = await base_file.read()
+        final_content = await final_file.read()
+        log.append(f"Archivos leídos: BASE={len(base_content)} bytes, FINAL={len(final_content)} bytes")
+        logger.info(f"TEST-PROMPT1: BASE={len(base_content)} bytes, FINAL={len(final_content)} bytes")
+        
+        # Guardar archivos
+        with open(job_dir / "BASE.xlsx", "wb") as f:
+            f.write(base_content)
+        with open(job_dir / "FINAL.xlsx", "wb") as f:
+            f.write(final_content)
+        log.append(f"Archivos guardados en {job_dir}")
+        logger.info(f"TEST-PROMPT1: Archivos guardados en {job_dir}")
+        
+        # Verificar que existen
+        base_exists = (job_dir / "BASE.xlsx").exists()
+        final_exists = (job_dir / "FINAL.xlsx").exists()
+        log.append(f"BASE.xlsx existe: {base_exists}, FINAL.xlsx existe: {final_exists}")
+        
+        return JSONResponse(content={
+            "status": "ok",
+            "message": "Test completado - archivos guardados",
+            "job_dir": str(job_dir),
+            "files": [],
+            "log": log
+        })
+    except Exception as e:
+        logger.error(f"TEST-PROMPT1: Error: {str(e)}")
+        return JSONResponse(
+            status_code=500,
+            content={
+                "status": "error",
+                "message": str(e),
+                "files": [],
+                "log": log + [traceback.format_exc()]
+            }
+        )
 
 
 if __name__ == "__main__":
