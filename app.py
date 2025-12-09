@@ -231,18 +231,31 @@ async def process_prompt1(
                     run_comparador()
                     success = True
                 except SystemExit as e:
-                    success = e.code == 0
+                    success = e.code == 0 if e.code is not None else False
+                    exit_code = e.code if e.code is not None else "unknown"
                     if not success:
-                        log.append(f"[{datetime.now().strftime('%H:%M:%S')}] Script terminó con código: {e.code}")
+                        log.append(f"[{datetime.now().strftime('%H:%M:%S')}] Script terminó con código: {exit_code}")
+                        # Capturar stderr si hay errores
+                        if stderr.getvalue():
+                            for line in stderr.getvalue().strip().split('\n'):
+                                if line.strip():
+                                    log.append(f"[{datetime.now().strftime('%H:%M:%S')}] ERROR: {line}")
                 except Exception as e:
                     success = False
                     log.append(f"[{datetime.now().strftime('%H:%M:%S')}] Error: {str(e)}")
                     log.append(traceback.format_exc())
             
+            # Capturar stdout
             if stdout.getvalue():
                 for line in stdout.getvalue().strip().split('\n'):
                     if line.strip():
                         log.append(f"[{datetime.now().strftime('%H:%M:%S')}] {line}")
+            
+            # Capturar stderr (errores adicionales)
+            if stderr.getvalue():
+                for line in stderr.getvalue().strip().split('\n'):
+                    if line.strip() and "ERROR:" not in line:  # Evitar duplicados
+                        log.append(f"[{datetime.now().strftime('%H:%M:%S')}] ERROR: {line}")
             
             files = []
             for f in job_dir.glob("*.xlsx"):

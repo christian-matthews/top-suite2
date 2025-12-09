@@ -562,7 +562,18 @@ def main():
     """
     Función principal que orquesta todo el flujo.
     """
-    args = parse_args()
+    # Capturar argumentos de la línea de comandos, pero ignorar los de uvicorn
+    # Esto es crucial cuando se ejecuta el script a través de uvicorn
+    original_argv = sys.argv
+    sys.argv = [original_argv[0]]  # Solo el nombre del script
+    try:
+        args = parse_args()
+    except SystemExit:
+        # Si argparse falla, usar valores por defecto
+        import argparse
+        args = argparse.Namespace(test=False, save=False)
+    finally:
+        sys.argv = original_argv  # Restaurar
     
     # Determinar directorio de trabajo
     # Primero verificar si hay archivos en el directorio actual (para uso desde API)
