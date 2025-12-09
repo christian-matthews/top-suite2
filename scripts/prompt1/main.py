@@ -38,18 +38,26 @@ def load_excel(path: str, sheet_name: str, fallback_sheet: str = None) -> pd.Dat
         # Leer el archivo Excel
         excel_file = pd.ExcelFile(path)
         
-        # Intentar usar la hoja principal, si no existe usar fallback
+        # Intentar usar la hoja principal
         actual_sheet = sheet_name
         if sheet_name not in excel_file.sheet_names:
-            if fallback_sheet and fallback_sheet in excel_file.sheet_names:
+            # Buscar hojas que empiecen con el nombre buscado (ej: "BASE 1", "BASE_1", "BASE1")
+            matching_sheets = [s for s in excel_file.sheet_names if s.upper().startswith(sheet_name.upper())]
+            
+            if matching_sheets:
+                actual_sheet = matching_sheets[0]
+                print(f"Advertencia: La hoja '{sheet_name}' no existe, usando '{actual_sheet}'")
+            elif fallback_sheet and fallback_sheet in excel_file.sheet_names:
                 actual_sheet = fallback_sheet
                 print(f"Advertencia: La hoja '{sheet_name}' no existe, usando '{fallback_sheet}'")
+            elif len(excel_file.sheet_names) == 1:
+                # Si solo hay una hoja, usarla
+                actual_sheet = excel_file.sheet_names[0]
+                print(f"Advertencia: La hoja '{sheet_name}' no existe, usando única hoja disponible: '{actual_sheet}'")
             else:
-                available_sheets = ", ".join(excel_file.sheet_names)
-                raise ValueError(
-                    f"La hoja '{sheet_name}' no existe en {path}. "
-                    f"Hojas disponibles: {available_sheets}"
-                )
+                # Usar la primera hoja como último recurso
+                actual_sheet = excel_file.sheet_names[0]
+                print(f"Advertencia: La hoja '{sheet_name}' no existe, usando primera hoja: '{actual_sheet}'")
         
         # Leer la hoja específica
         df = pd.read_excel(path, sheet_name=actual_sheet)
