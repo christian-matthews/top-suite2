@@ -278,9 +278,10 @@
                     <span class="process-title">📋 PROMPT0 - Migrador</span>
                 </div>
                 <p class="process-desc">Migra datos de formato antiguo a nuevo usando mapeo inteligente.</p>
+                <p style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 1rem;">📌 El archivo se renombrará automáticamente a CORE.xlsx</p>
                 <form id="form-prompt0" onsubmit="submitForm(event, 'prompt0', '/api/prompt0')">
                     <div class="file-input-group">
-                        <label>Archivo CORE.xlsx (con hojas ANTIGUO, TRAINING, FINAL)</label>
+                        <label>📄 Archivo con hojas ANTIGUO, TRAINING, FINAL → se guardará como CORE.xlsx</label>
                         <input type="file" name="file" class="file-input" accept=".xlsx,.xls" required>
                     </div>
                     <button type="submit" class="btn">
@@ -296,13 +297,14 @@
                     <span class="process-title">🔍 PROMPT1 - Comparar MP</span>
                 </div>
                 <p class="process-desc">Compara dos versiones de Maestro de Productos (BASE vs FINAL).</p>
+                <p style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 1rem;">📌 Los archivos se renombrarán automáticamente a BASE.xlsx y FINAL.xlsx</p>
                 <form id="form-prompt1" onsubmit="submitForm(event, 'prompt1', '/api/prompt1')">
                     <div class="file-input-group">
-                        <label>Archivo BASE.xlsx</label>
+                        <label>📄 Archivo BASE (versión anterior) → se guardará como BASE.xlsx</label>
                         <input type="file" name="base_file" class="file-input" accept=".xlsx,.xls" required>
                     </div>
                     <div class="file-input-group">
-                        <label>Archivo FINAL.xlsx</label>
+                        <label>📄 Archivo FINAL (versión nueva) → se guardará como FINAL.xlsx</label>
                         <input type="file" name="final_file" class="file-input" accept=".xlsx,.xls" required>
                     </div>
                     <button type="submit" class="btn">
@@ -318,13 +320,14 @@
                     <span class="process-title">💰 PROMPT2 - Procesar Ventas</span>
                 </div>
                 <p class="process-desc">Procesa ventas contra el Maestro de Productos.</p>
+                <p style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 1rem;">📌 Los archivos se renombrarán automáticamente</p>
                 <form id="form-prompt2" onsubmit="submitForm(event, 'prompt2', '/api/prompt2')">
                     <div class="file-input-group">
-                        <label>Archivo MP KEY.xlsx</label>
+                        <label>📄 Archivo MP KEY → se guardará como MP KEY.xlsx</label>
                         <input type="file" name="mp_key_file" class="file-input" accept=".xlsx,.xls" required>
                     </div>
                     <div class="file-input-group">
-                        <label>Archivo de Ventas.xlsx</label>
+                        <label>📄 Archivo de Ventas → se guardará como Ventas JUL-AGO-SEP-OCT.xlsx</label>
                         <input type="file" name="ventas_file" class="file-input" accept=".xlsx,.xls" required>
                     </div>
                     <button type="submit" class="btn">
@@ -340,13 +343,14 @@
                     <span class="process-title">✨ PROMPT3 - Enriquecer Transacciones</span>
                 </div>
                 <p class="process-desc">Enriquece transacciones con SAP_ID desde MP KEY.</p>
+                <p style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 1rem;">📌 Los archivos se renombrarán automáticamente</p>
                 <form id="form-prompt3" onsubmit="submitForm(event, 'prompt3', '/api/prompt3')">
                     <div class="file-input-group">
-                        <label>Archivo TX_Carga.xlsx</label>
+                        <label>📄 Archivo de Transacciones → se guardará como TX_Carga.xlsx</label>
                         <input type="file" name="tx_carga_file" class="file-input" accept=".xlsx,.xls" required>
                     </div>
                     <div class="file-input-group">
-                        <label>Archivo MP KEY.xlsx</label>
+                        <label>📄 Archivo MP KEY → se guardará como MP KEY.xlsx</label>
                         <input type="file" name="mp_key_file" class="file-input" accept=".xlsx,.xls" required>
                     </div>
                     <button type="submit" class="btn">
