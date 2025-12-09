@@ -7,10 +7,11 @@ set -e
 echo "🔧 Instalando dependencias..."
 
 # Instalar pip, setuptools y wheel actualizados primero
-pip install --upgrade pip setuptools wheel
+pip install --upgrade pip
+pip install --upgrade setuptools wheel build
 
-# Instalar dependencias con preferencia por wheels
-pip install --only-binary :all: --prefer-binary -r requirements.txt || pip install -r requirements.txt
+# Instalar dependencias (sin forzar only-binary para evitar errores)
+pip install -r requirements.txt
 
 echo "✅ Dependencias instaladas"
 
