@@ -202,13 +202,13 @@ async def process_prompt0(file: UploadFile = File(...)):
                 except:
                     pass
             
-            return {
+            return JSONResponse(content={
                 "status": "ok" if success or files else "error",
                 "message": "Migración completada" if files else "Error en migración",
                 "files": files,
                 "log": log,
                 "job_id": job_dir.name
-            }
+            })
         finally:
             os.chdir(original_cwd)
             
@@ -292,19 +292,30 @@ async def process_prompt1(
             for f in job_dir.glob("*.txt"):
                 files.append({"name": f.name, "url": f"/download/{job_dir.name}/{f.name}"})
             
-            return {
+            return JSONResponse(content={
                 "status": "ok" if success else "error",
                 "message": "Comparación completada" if success else "Error",
                 "files": files,
                 "log": log,
                 "job_id": job_dir.name
-            }
+            })
         finally:
             os.chdir(original_cwd)
             
     except Exception as e:
-        log.append(f"[{datetime.now().strftime('%H:%M:%S')}] Error: {str(e)}")
-        return {"status": "error", "message": str(e), "files": [], "log": log}
+        error_msg = str(e)
+        error_trace = traceback.format_exc()
+        log.append(f"[{datetime.now().strftime('%H:%M:%S')}] Error general: {error_msg}")
+        log.append(error_trace)
+        return JSONResponse(
+            status_code=500,
+            content={
+                "status": "error",
+                "message": error_msg,
+                "files": [],
+                "log": log
+            }
+        )
 
 
 # ============================================================
@@ -358,19 +369,30 @@ async def process_prompt2(
                 for f in proceso_dir.glob("*.xlsx"):
                     files.append({"name": f.name, "url": f"/download/{job_dir.name}/{proceso_dir.name}/{f.name}"})
             
-            return {
+            return JSONResponse(content={
                 "status": "ok" if success else "error",
                 "message": "Procesamiento completado" if success else "Error",
                 "files": files,
                 "log": log,
                 "job_id": job_dir.name
-            }
+            })
         finally:
             os.chdir(original_cwd)
             
     except Exception as e:
-        log.append(f"[{datetime.now().strftime('%H:%M:%S')}] Error: {str(e)}")
-        return {"status": "error", "message": str(e), "files": [], "log": log}
+        error_msg = str(e)
+        error_trace = traceback.format_exc()
+        log.append(f"[{datetime.now().strftime('%H:%M:%S')}] Error general: {error_msg}")
+        log.append(error_trace)
+        return JSONResponse(
+            status_code=500,
+            content={
+                "status": "error",
+                "message": error_msg,
+                "files": [],
+                "log": log
+            }
+        )
 
 
 # ============================================================
@@ -420,13 +442,13 @@ async def process_prompt3(
             files = [{"name": f.name, "url": f"/download/{job_dir.name}/{f.name}"} 
                      for f in job_dir.glob("*.xlsx") if f.name not in ["TX_Carga.xlsx", "MP KEY.xlsx"]]
             
-            return {
+            return JSONResponse(content={
                 "status": "ok" if success or files else "error",
                 "message": "Enriquecimiento completado" if success else "Completado con advertencias",
                 "files": files,
                 "log": log,
                 "job_id": job_dir.name
-            }
+            })
         finally:
             os.chdir(original_cwd)
             
@@ -474,17 +496,28 @@ async def process_maestro_producto(file: UploadFile = File(...)):
         if success and output_file.exists():
             files.append({"name": output_file.name, "url": f"/download/{job_dir.name}/{output_file.name}"})
         
-        return {
+        return JSONResponse(content={
             "status": "ok" if success else "error",
             "message": "Procesamiento completado" if success else "Error",
             "files": files,
             "log": log,
             "job_id": job_dir.name
-        }
+        })
         
     except Exception as e:
-        log.append(f"[{datetime.now().strftime('%H:%M:%S')}] Error: {str(e)}")
-        return {"status": "error", "message": str(e), "files": [], "log": log}
+        error_msg = str(e)
+        error_trace = traceback.format_exc()
+        log.append(f"[{datetime.now().strftime('%H:%M:%S')}] Error general: {error_msg}")
+        log.append(error_trace)
+        return JSONResponse(
+            status_code=500,
+            content={
+                "status": "error",
+                "message": error_msg,
+                "files": [],
+                "log": log
+            }
+        )
 
 
 # ============================================================
@@ -494,7 +527,7 @@ async def process_maestro_producto(file: UploadFile = File(...)):
 @app.get("/health")
 async def health():
     """Verifica el estado del servidor"""
-    return {"status": "ok", "message": "TOP Suite 2 funcionando"}
+    return JSONResponse(content={"status": "ok", "message": "TOP Suite 2 funcionando"})
 
 
 @app.post("/api/test-upload")
