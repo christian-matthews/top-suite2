@@ -246,13 +246,22 @@ async def process_prompt1(
     final_file: UploadFile = File(...)
 ):
     """Compara BASE vs FINAL"""
+    # Logging inmediato con flush
+    print("=" * 50, flush=True)
+    print("PROMPT1: ENDPOINT LLAMADO", flush=True)
+    print(f"PROMPT1: base_file={base_file.filename}, final_file={final_file.filename}", flush=True)
+    print("=" * 50, flush=True)
     logger.info("PROMPT1: Iniciando endpoint")
-    job_dir = create_job_dir()
-    logger.info(f"PROMPT1: Job dir creado: {job_dir}")
+    
+    job_dir = None
     log = []
     original_cwd = None
     
     try:
+        job_dir = create_job_dir()
+        print(f"PROMPT1: Job dir creado: {job_dir}", flush=True)
+        logger.info(f"PROMPT1: Job dir creado: {job_dir}")
+        
         log.append(f"[{datetime.now().strftime('%H:%M:%S')}] Iniciando PROMPT1 - Comparador...")
         logger.info("PROMPT1: Guardando archivos...")
         
