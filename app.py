@@ -237,18 +237,44 @@ async def process_prompt1(
     """Compara BASE vs FINAL"""
     job_dir = create_job_dir()
     log = []
+    original_cwd = None
     
     try:
         log.append(f"[{datetime.now().strftime('%H:%M:%S')}] Iniciando PROMPT1 - Comparador...")
         
         # Guardar archivos
-        with open(job_dir / "BASE.xlsx", "wb") as f:
-            shutil.copyfileobj(base_file.file, f)
-        with open(job_dir / "FINAL.xlsx", "wb") as f:
-            shutil.copyfileobj(final_file.file, f)
-        log.append(f"[{datetime.now().strftime('%H:%M:%S')}] Archivos recibidos")
+        try:
+            with open(job_dir / "BASE.xlsx", "wb") as f:
+                shutil.copyfileobj(base_file.file, f)
+            with open(job_dir / "FINAL.xlsx", "wb") as f:
+                shutil.copyfileobj(final_file.file, f)
+            log.append(f"[{datetime.now().strftime('%H:%M:%S')}] Archivos recibidos")
+        except Exception as e:
+            log.append(f"[{datetime.now().strftime('%H:%M:%S')}] Error al guardar archivos: {str(e)}")
+            return JSONResponse(
+                status_code=500,
+                content={
+                    "status": "error",
+                    "message": f"Error al guardar archivos: {str(e)}",
+                    "files": [],
+                    "log": log
+                }
+            )
         
-        from prompt1.main import main as run_comparador
+        # Importar el módulo de forma segura
+        try:
+            from prompt1.main import main as run_comparador
+        except Exception as e:
+            log.append(f"[{datetime.now().strftime('%H:%M:%S')}] Error al importar módulo: {str(e)}")
+            return JSONResponse(
+                status_code=500,
+                content={
+                    "status": "error",
+                    "message": f"Error al importar módulo: {str(e)}",
+                    "files": [],
+                    "log": log
+                }
+            )
         
         original_cwd = os.getcwd()
         os.chdir(str(job_dir))
@@ -256,9 +282,11 @@ async def process_prompt1(
         try:
             with capture_output() as (stdout, stderr):
                 try:
+                    # Ejecutar el script con protección adicional
                     run_comparador()
                     success = True
                 except SystemExit as e:
+                    # Capturar SystemExit sin crashear el servidor
                     success = e.code == 0 if e.code is not None else False
                     exit_code = e.code if e.code is not None else "unknown"
                     if not success:
@@ -268,9 +296,12 @@ async def process_prompt1(
                             for line in stderr.getvalue().strip().split('\n'):
                                 if line.strip():
                                     log.append(f"[{datetime.now().strftime('%H:%M:%S')}] ERROR: {line}")
+                except KeyboardInterrupt:
+                    success = False
+                    log.append(f"[{datetime.now().strftime('%H:%M:%S')}] Proceso interrumpido")
                 except Exception as e:
                     success = False
-                    log.append(f"[{datetime.now().strftime('%H:%M:%S')}] Error: {str(e)}")
+                    log.append(f"[{datetime.now().strftime('%H:%M:%S')}] Error en script: {str(e)}")
                     log.append(traceback.format_exc())
             
             # Capturar stdout
@@ -294,19 +325,32 @@ async def process_prompt1(
             
             return JSONResponse(content={
                 "status": "ok" if success else "error",
-                "message": "Comparación completada" if success else "Error",
+                "message": "Comparación completada" if success else "Error en comparación",
                 "files": files,
                 "log": log,
                 "job_id": job_dir.name
             })
         finally:
-            os.chdir(original_cwd)
+            # Asegurar que siempre se restaure el directorio
+            if original_cwd:
+                try:
+                    os.chdir(original_cwd)
+                except:
+                    pass
             
     except Exception as e:
         error_msg = str(e)
         error_trace = traceback.format_exc()
         log.append(f"[{datetime.now().strftime('%H:%M:%S')}] Error general: {error_msg}")
         log.append(error_trace)
+        
+        # Asegurar que se restaure el directorio incluso en caso de error
+        if original_cwd:
+            try:
+                os.chdir(original_cwd)
+            except:
+                pass
+        
         return JSONResponse(
             status_code=500,
             content={
