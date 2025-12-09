@@ -6,6 +6,8 @@ Todo en un solo servidor FastAPI (sin frontend separado)
 from fastapi import FastAPI, File, UploadFile, Request, Form
 from fastapi.responses import HTMLResponse, FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
+from fastapi.exceptions import RequestValidationError, HTTPException
+from fastapi.exception_handlers import http_exception_handler
 from pathlib import Path
 import shutil
 import sys
@@ -22,6 +24,32 @@ sys.path.insert(0, str(BASE_DIR / "scripts"))
 
 app = FastAPI(title="TOP Suite 2", version="2.0.0")
 
+
+# Manejador para errores HTTP (404, 500, etc.) - siempre devuelve JSON
+@app.exception_handler(HTTPException)
+async def http_exception_handler_json(request: Request, exc: HTTPException):
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={
+            "status": "error",
+            "message": exc.detail,
+            "files": [],
+            "log": [f"Error HTTP {exc.status_code}: {exc.detail}"]
+        }
+    )
+
+# Manejador para errores de validación - siempre devuelve JSON
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    return JSONResponse(
+        status_code=422,
+        content={
+            "status": "error",
+            "message": "Error de validación de datos",
+            "files": [],
+            "log": [f"Error de validación: {str(exc)}"]
+        }
+    )
 
 # Manejador global de excepciones - siempre devuelve JSON
 @app.exception_handler(Exception)
